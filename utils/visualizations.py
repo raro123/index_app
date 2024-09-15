@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from typing import List
@@ -359,12 +360,12 @@ def plot_correlation_heatmap(index_data: pd.DataFrame, selected_symbols: List[st
 
     # Create layout
     layout = go.Layout(
-        title=dict(
-            text='Correlation Heatmap of Selected Indices',
-            font=dict(size=24, color="#333"),
-            x=0.5,
-            y=0.95
-        ),
+        # title=dict(
+        #     text='Correlation Heatmap of Selected Indices',
+        #     font=dict(size=24, color="#333"),
+        #     x=0.5,
+        #     y=0.95
+        # ),
         width=800,
         height=700,
         xaxis=dict(title='', ticks='', side='top'),
@@ -381,3 +382,25 @@ def plot_correlation_heatmap(index_data: pd.DataFrame, selected_symbols: List[st
     fig.update_layout(annotations=annotations)
 
     return fig
+
+
+def format_performace_stats_dataframe(df):
+    return (df.style
+        .format({
+            'ann_mean': '{:.1%}',
+            'ann_std': '{:.1%}',
+            'sharpe_ratio': '{:.2f}',
+            'skew': '{:.2f}',
+            'avg_drawdown': '{:.2%}',
+            'max_drawdown': '{:.2%}',
+            'quant_ratio_lower': '{:.2f}',
+            'quant_ratio_upper': '{:.2f}'
+        })
+        # .background_gradient(cmap='RdYlGn', subset=['ann_mean', 'sharpe_ratio', 'skew'])
+        # .background_gradient(cmap='RdYlGn_r', subset=['ann_std', 'avg_drawdown', 'max_drawdown'])
+        .set_properties(**{'text-align': 'right'})
+        .set_table_styles([
+            {'selector': 'th', 'props': [('text-align', 'left')]},
+            {'selector': 'td', 'props': [('text-align', 'right')]}
+        ])
+    )

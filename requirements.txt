@@ -6,3 +6,4 @@ plotly
 deltalake
 scipy
 boto3
+matplotlib
