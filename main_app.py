@@ -69,5 +69,5 @@ with left_column:
 
 with right_column:
 # Adjust width as needed
-    st.image("bds_transparent_logo.png", width=120)
+    st.image("logo.png", width=120)
 pg.run()
