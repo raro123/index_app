@@ -14,7 +14,7 @@ def index_distribution(df):
 
     # Index Type dropdown
     index_types = df['index_type'].unique()
-    selected_index_type = st.sidebar.selectbox("Select Index Type", index_types)
+    selected_index_type = st.sidebar.selectbox("Select Index Type", index_types, index=1)
 
     # Date range slider
     min_date = df['date'].min().date()

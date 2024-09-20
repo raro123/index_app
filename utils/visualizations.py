@@ -130,7 +130,7 @@ def plot_index_returns_boxplots(df, index_type, category):
     return fig
 
 
-def plot_performance(zscore_change_df: pd.DataFrame, n_periods: int, data_zscored = True) -> go.Figure:
+def plot_performance(zscore_change_df: pd.DataFrame, n_periods: int,chart_title:str,x_axis_title:str, data_zscored = True) -> go.Figure:
     """
     Plots the performance of NIFTY indices based on the z-score changes.
 
@@ -148,13 +148,21 @@ def plot_performance(zscore_change_df: pd.DataFrame, n_periods: int, data_zscore
     # Add traces for each column
     for i, column in enumerate(df.columns, 1):
         column_data = df[column].sort_values()
+        # Format the text based on whether the data is z-scored or not
+        if data_zscored:
+            text = column_data.values.round(4)
+            texttemplate = '%{text:.1f}'
+        else:
+            text = (column_data.values * 100).round(2)  # Convert to percentage and round
+            texttemplate = '%{text:.1f}%'  # Add % sign
 
         fig.add_trace(
             go.Bar(
                 y=column_data.index,
                 x=column_data.values,
                 name=column,
-                text=column_data.values.round(4),
+                text=text,
+                texttemplate=texttemplate,
                 textposition='outside',
                 orientation='h'
             ),
@@ -165,18 +173,28 @@ def plot_performance(zscore_change_df: pd.DataFrame, n_periods: int, data_zscore
         if data_zscored:
             for x in [-2, -1, 1, 2]:
                 fig.add_vline(x=x, line_width=1, line_dash="dash", line_color="gray", row=1, col=i)
+        x_min = min(column_data.values.min(), -2 if data_zscored else -0.02)
+        x_max = max(column_data.values.max(), 2 if data_zscored else 0.02)
+        x_range = x_max - x_min
+        x_padding = 0.1 * x_range  # 10% padding
+        fig.update_xaxes(range=[x_min - x_padding, x_max + x_padding], row=1, col=i)
 
     # Update layout
     fig.update_layout(
         height=750,
         width=600 * len(df.columns),  # Adjust width based on number of columns
-        title_text="NIFTY Indices Performance",
+        title_text=chart_title,
         showlegend=False,
-        barmode='group'
+        barmode='group',
     )
+    
+    if data_zscored:
+        tickformat = '.0f'
+    else:
+        tickformat = '.0%'   
 
     # Update x-axes
-    fig.update_xaxes(title_text="Performance", tickformat='.2f')
+    fig.update_xaxes(title_text=x_axis_title, tickformat=tickformat)
 
     # Update y-axes
     fig.update_yaxes(autorange="reversed")  # To maintain consistent order across subplots

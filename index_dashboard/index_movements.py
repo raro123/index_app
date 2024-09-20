@@ -18,7 +18,7 @@ def index_movement(df):
     # Index Type dropdown
     index_types = df['index_type'].unique()
     selected_index_type = st.sidebar.selectbox(
-        "Select Index Type", index_types)
+        "Select Index Type", index_types, index=1)
 
     # Date range slider
     min_date = df['date'].min().date()
@@ -58,22 +58,17 @@ def index_movement(df):
     tab1, tab2 = st.tabs(["Broad Index Movements", "Sectoral Index Movements"])
     with tab1:
             zscore_broad_df = logrets_broad_df/logrets_vol_broad_df
-            fig_z_price_broad = plot_performance(zscore_broad_df, n_periods)
-            fig_rets_price_broad = plot_performance(logrets_broad_df, n_periods, data_zscored=False)
-            fig_vol_price_broad = plot_performance(logrets_vol_broad_df, n_periods, data_zscored=False)
-
-            st.subheader("NIFTY Broad Price Indices Performance")
+            fig_z_price_broad = plot_performance(zscore_broad_df, n_periods, 'Index Zscore Performance', 'Zscore')
+            fig_rets_price_broad = plot_performance(logrets_broad_df, n_periods, 'Index Return Performance', 'Return', data_zscored=False)
+            fig_vol_price_broad = plot_performance(logrets_vol_broad_df, n_periods, 'Index Vol Performance', 'Volatility', data_zscored=False)
             st.plotly_chart(fig_z_price_broad, use_container_width=True)
             st.plotly_chart(fig_rets_price_broad, use_container_width=True)
             st.plotly_chart(fig_vol_price_broad, use_container_width=True)
     with tab2:
             zscore_sectoral_df = logrets_sectoral_df/logrets_vol_sectoral_df
-            fig_z_price_sect = plot_performance(zscore_sectoral_df, n_periods)
-            fig_rets_price_sect = plot_performance(logrets_sectoral_df, n_periods, data_zscored=False)
-            fig_vol_price_sect = plot_performance(logrets_vol_sectoral_df, n_periods, data_zscored=False)
-
-
-            st.subheader("NIFTY Sectoral Price Indices Performance")
+            fig_z_price_sect = plot_performance(zscore_sectoral_df, n_periods,'Index Zscore Performance', 'Zscore')
+            fig_rets_price_sect = plot_performance(logrets_sectoral_df, n_periods,'Index Return Performance', 'Return', data_zscored=False)
+            fig_vol_price_sect = plot_performance(logrets_vol_sectoral_df, n_periods,'Index Vol Performance', 'Volatility', data_zscored=False)
             st.plotly_chart(fig_z_price_sect, use_container_width=True)
             st.plotly_chart(fig_rets_price_sect, use_container_width=True)
             st.plotly_chart(fig_vol_price_sect, use_container_width=True)
