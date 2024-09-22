@@ -1,11 +1,13 @@
 import streamlit as st
 import pandas as pd
 
-from utils.data_processing import load_daily_price_data, create_wide_price_df
-from utils.visualizations import plot_index_deepdive,plot_correlation_heatmap
+from utils.data_processing import load_daily_price_data, create_wide_price_df,load_daily_ratio_data
+from utils.visualizations import plot_index_deepdive,plot_correlation_heatmap,plot_financial_ratios
 
 # Load data
 df = load_daily_price_data()
+ratio_df = load_daily_ratio_data()
+
 
 
 def index_deepdive(df):
@@ -44,16 +46,24 @@ def index_deepdive(df):
         (df['date'].dt.date >= start_date) &
         (df['date'].dt.date <= end_date)
     ].pipe(create_wide_price_df)
+    
+    filtered_ratio_df = ratio_df[
+        (ratio_df['symbol'].isin(selected_indices)) &
+        (ratio_df['date'].dt.date >= start_date) &
+        (ratio_df['date'].dt.date <= end_date)
+    ]
 
     # Create tabs
     tab1, tab2 = st.tabs(["Historical Timeseries", "Rolling Timeseries"])
 
     with tab1:
         index_timeseries_plots = plot_index_deepdive(filtered_df, selected_indices)
-        index_correlation_plots = plot_correlation_heatmap(filtered_df,selected_indices)
+        #index_correlation_plots = plot_correlation_heatmap(filtered_df,selected_indices)
+        index_val_plot = plot_financial_ratios(filtered_ratio_df,selected_indices)
         try:
             st.plotly_chart(index_timeseries_plots, use_container_width=True)
-            st.plotly_chart(index_correlation_plots, use_container_width=True)
+            #st.plotly_chart(index_correlation_plots, use_container_width=True)
+            st.plotly_chart(index_val_plot, use_container_width=True)
         except Exception as e:
             st.write('Please select the symbol from the dropdown to continue')
 

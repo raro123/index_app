@@ -6,6 +6,7 @@ from deltalake import DeltaTable
 from utils.cloudstorage import get_storage_options
 
 DATAPATH = 's3://financial-data-store/bronze/nseindex/daily_price_nifty_indices/'
+RATIODATAPATH = 's3://financial-data-store/bronze/nseindex/daily_ratios_nifty_indices/'
 QUANT_PERCENTILE_EXTREME = 0.01
 QUANT_PERCENTILE_STD = 0.3
 NORMAL_DISTR_RATIO = norm.ppf(QUANT_PERCENTILE_EXTREME) / norm.ppf(QUANT_PERCENTILE_STD)
@@ -35,6 +36,9 @@ def load_daily_price_data(path=DATAPATH):
     daily_index_price = DeltaTable(path, storage_options=get_storage_options()).to_pandas()
     return daily_index_price
 
+def load_daily_ratio_data(path=RATIODATAPATH):
+    daily_index_price = DeltaTable(path, storage_options=get_storage_options()).to_pandas()
+    return daily_index_price
 
 def robust_vol(
     daily_returns:pd.Series,
@@ -242,6 +246,6 @@ def calculate_returns_wide(df,kind = 'log', resample=None,dropna=True, close_col
     else:
         return np.expm1(log_returns)
     
-def create_wide_price_df(df):
-    analysis_df = df[['symbol','close','date']].set_index(['date','symbol']).unstack(1).droplevel(0, axis=1).sort_index()
+def create_wide_price_df(df, val_col = 'close'):
+    analysis_df = df[['symbol',val_col,'date']].set_index(['date','symbol']).unstack(1).droplevel(0, axis=1).sort_index()
     return analysis_df

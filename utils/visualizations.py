@@ -315,6 +315,81 @@ def plot_index_deepdive(index_data: pd.DataFrame, selected_symbols: List[str]) -
 
     return fig
 
+
+def plot_financial_ratios(df, symbols=None):
+    # Create subplot figure
+    fig = make_subplots(rows=3, cols=1, 
+                        shared_xaxes=True, 
+                        vertical_spacing=0.1,
+                        subplot_titles=("PE Ratio", "PB Ratio", "Dividend Yield"))
+
+    # If no symbols are provided, use all unique symbols in the DataFrame
+    if symbols is None:
+        symbols = df['symbol'].unique()
+
+    # Color scale for different symbols
+    colors = ['blue', 'red', 'green', 'purple', 'orange', 'brown', 'pink', 'gray', 'olive', 'cyan']
+
+    # Filter DataFrame for selected symbols
+    df_filtered = df[df['symbol'].isin(symbols)]
+
+    # Plot data for each symbol
+    for i, symbol in enumerate(symbols):
+        symbol_data = df_filtered[df_filtered['symbol'] == symbol].sort_values('date')
+        color = colors[i % len(colors)]  # Cycle through colors if more symbols than colors
+
+        # Common hover template
+        hovertemplate = f"Symbol: {symbol}<br>Date: %{{x}}<br>Value: %{{y:.2f}}<extra></extra>"
+
+        # PE Ratio
+        fig.add_trace(go.Scatter(x=symbol_data['date'], y=symbol_data['pe'],
+                                 mode='lines', name=symbol,
+                                 line=dict(color=color),
+                                 hovertemplate=hovertemplate), row=1, col=1)
+
+        # PB Ratio
+        fig.add_trace(go.Scatter(x=symbol_data['date'], y=symbol_data['pb'],
+                                 mode='lines', name=symbol, showlegend=False,
+                                 line=dict(color=color),
+                                 hovertemplate=hovertemplate), row=2, col=1)
+
+        # Dividend Yield
+        fig.add_trace(go.Scatter(x=symbol_data['date'], y=symbol_data['dividend_yield'],
+                                 mode='lines', name=symbol, showlegend=False,
+                                 line=dict(color=color),
+                                 hovertemplate=hovertemplate), row=3, col=1)
+
+    # Add average lines (using filtered data)
+    pe_avg = df_filtered['pe'].mean()
+    pb_avg = df_filtered['pb'].mean()
+    div_yield_avg = df_filtered['dividend_yield'].mean()
+
+    fig.add_hline(y=pe_avg, line_dash="dash", line_color="black", row=1, col=1)
+    fig.add_hline(y=pb_avg, line_dash="dash", line_color="black", row=2, col=1)
+    fig.add_hline(y=div_yield_avg, line_dash="dash", line_color="black", row=3, col=1)
+
+    # Update layout
+    fig.update_layout(
+        height=900, 
+        width=800, 
+        title_text="Financial Ratios Over Time",
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        hovermode="x unified"
+    )
+    fig.update_xaxes(title_text="Date", row=3, col=1)
+    fig.update_yaxes(title_text="PE Ratio", row=1, col=1)
+    fig.update_yaxes(title_text="PB Ratio", row=2, col=1)
+    fig.update_yaxes(title_text="Dividend Yield (%)", row=3, col=1)
+
+    return fig
+
+
 def plot_correlation_heatmap(index_data: pd.DataFrame, selected_symbols: List[str]) -> go.Figure:
     """
     Create a correlation heatmap for the returns of selected indices.
