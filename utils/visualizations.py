@@ -360,9 +360,9 @@ def plot_financial_ratios(df, symbols=None):
                                  hovertemplate=hovertemplate), row=3, col=1)
 
     # Add average lines (using filtered data)
-    pe_avg = df_filtered['pe'].mean()
-    pb_avg = df_filtered['pb'].mean()
-    div_yield_avg = df_filtered['dividend_yield'].mean()
+    pe_avg = df_filtered['pe'].median()
+    pb_avg = df_filtered['pb'].median()
+    div_yield_avg = df_filtered['dividend_yield'].median()
 
     fig.add_hline(y=pe_avg, line_dash="dash", line_color="black", row=1, col=1)
     fig.add_hline(y=pb_avg, line_dash="dash", line_color="black", row=2, col=1)
