@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
-from utils.data_processing import load_daily_price_data, create_wide_price_df,load_daily_ratio_data
+from utils.data_processing import load_daily_price_data, create_wide_price_df,load_daily_ratio_data,calculate_returns_wide
 from utils.visualizations import plot_index_deepdive,plot_correlation_heatmap,plot_financial_ratios
 
 # Load data
@@ -59,9 +60,30 @@ def index_deepdive(df):
     with tab1:
         index_timeseries_plots = plot_index_deepdive(filtered_df, selected_indices)
         #index_correlation_plots = plot_correlation_heatmap(filtered_df,selected_indices)
+        logrets_df = filtered_df.apply(np.log).diff()
         index_val_plot = plot_financial_ratios(filtered_ratio_df,selected_indices)
         try:
             st.plotly_chart(index_timeseries_plots, use_container_width=True)
+            st.subheader('Nifty Indices Returns')
+            st.dataframe(
+                (logrets_df
+                .stack()
+                .reset_index()
+                .groupby(['symbol',pd.Grouper(key = 'date',freq='ME')])
+                .sum()
+                .reset_index()
+                .assign(year = lambda x: x.date.dt.year.astype('str'),
+                        month = lambda x: x.date.dt.month)
+                .pivot(columns='month',values=0,index= ['symbol','year'])
+                .assign(ytd = lambda x:x.sum(axis=1))
+                .apply(np.expm1)
+                .mul(100)
+                .reset_index()
+                .query('symbol in @selected_indices')
+                .style.format('{:.1f}%',na_rep='-',subset=[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 'ytd'])
+                )
+                ,use_container_width=True
+            )
             #st.plotly_chart(index_correlation_plots, use_container_width=True)
             st.plotly_chart(index_val_plot, use_container_width=True)
         except Exception as e:
